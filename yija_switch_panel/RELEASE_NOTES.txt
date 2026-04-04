@@ -1,6 +1,0 @@
-Ultimate recognition build
-- Added _TZE284_atuj3i0w to ts0601_switch.py manufacturer map
-- Keeps all known TS0601 screen-switch manufacturers in ts0601_switch_screen.py
-- Based on user-provided yija_switch_panel.zip
-
-Important: For ZHA quirk changes to take effect, remove the device, restart Home Assistant, then pair again.
