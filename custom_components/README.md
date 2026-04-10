@@ -75,6 +75,25 @@ https://github.com/zhao00111/yija
 3. 安装 Integration
 4. 重启 HA
 
+### 🔧 Quirks Load Check | quirks 加载检查
+
+If quirks do not load correctly, please check your `configuration.yaml` and make sure it contains:
+
+如果遇到 quirks 无法加载，请检查 `configuration.yaml`，并确认包含以下配置：
+
+```yaml
+zha:
+  enable_quirks: true
+  custom_quirks_path: /config/custom_quirks
+```
+
+Notes:
+
+- The integration will try to auto-update `configuration.yaml` on first install.
+- If your `zha:` config uses `!include` or another custom YAML structure, please add the block manually.
+- After updating `configuration.yaml`, restart Home Assistant.
+- If the device was already paired before quirks were loaded, remove and pair the device again.
+
 ---
 
 ## 🔌 Device Setup | 设备接入

@@ -22,12 +22,17 @@ _ZHA_BLOCK_RE = re.compile(r"^zha:\s*(?:#.*)?$")
 _ZHA_INLINE_RE = re.compile(r"^zha:\s+\S+")
 _ENABLE_QUIRKS_RE = re.compile(r"^\s*enable_quirks:\s*(true|false)\s*(?:#.*)?$")
 _CUSTOM_QUIRKS_RE = re.compile(r"^\s*custom_quirks_path:\s*(.+?)\s*(?:#.*)?$")
+_REQUIRED_ZHA_CONFIG = (
+    "zha:\n"
+    "  enable_quirks: true\n"
+    f"  custom_quirks_path: {ZHA_CUSTOM_QUIRKS_PATH}"
+)
 
 
 async def async_deploy_quirks(hass: HomeAssistant) -> None:
     """Copy bundled quirk files into the active HA config directory."""
     config_dir = hass.config.path()
-    updated = await hass.async_add_executor_job(
+    updated, valid = await hass.async_add_executor_job(
         _ensure_zha_custom_quirks_config,
         config_dir,
     )
@@ -35,6 +40,12 @@ async def async_deploy_quirks(hass: HomeAssistant) -> None:
         _LOGGER.warning(
             "%s updated configuration.yaml with zha custom quirks settings; restart Home Assistant to let ZHA load quirks during startup",
             DOMAIN,
+        )
+    elif not valid:
+        _LOGGER.warning(
+            "%s quirks may fail to load because configuration.yaml does not contain the required ZHA quirk settings. Please check configuration.yaml and add:\n%s",
+            DOMAIN,
+            _REQUIRED_ZHA_CONFIG,
         )
     await hass.async_add_executor_job(_deploy_quirks, config_dir)
     await hass.async_add_executor_job(_reload_quirk_registry, config_dir)
@@ -49,7 +60,7 @@ def _resolve_target_dir(config_dir: str) -> Path:
     return config_path / quirks_path
 
 
-def _ensure_zha_custom_quirks_config(config_dir: str) -> bool:
+def _ensure_zha_custom_quirks_config(config_dir: str) -> tuple[bool, bool]:
     """Ensure configuration.yaml enables ZHA quirks and points to custom quirks."""
     config_path = Path(config_dir) / "configuration.yaml"
     desired_block = [
@@ -61,12 +72,14 @@ def _ensure_zha_custom_quirks_config(config_dir: str) -> bool:
     if not config_path.exists():
         config_path.write_text("\n".join(desired_block) + "\n", encoding="utf-8")
         _LOGGER.warning("%s created configuration.yaml with zha custom quirks settings", DOMAIN)
-        return True
+        return True, True
 
     original = config_path.read_text(encoding="utf-8")
     updated = _update_configuration_yaml(original)
-    if updated is None or updated == original:
-        return False
+    if updated is None:
+        return False, _has_required_zha_config(original)
+    if updated == original:
+        return False, True
 
     backup_path = config_path.with_suffix(f"{config_path.suffix}.{DOMAIN}.bak")
     if not backup_path.exists():
@@ -74,7 +87,7 @@ def _ensure_zha_custom_quirks_config(config_dir: str) -> bool:
         _LOGGER.warning("%s backed up configuration.yaml to %s", DOMAIN, backup_path)
 
     config_path.write_text(updated, encoding="utf-8")
-    return True
+    return True, True
 
 
 def _update_configuration_yaml(text: str) -> str | None:
@@ -145,6 +158,38 @@ def _update_zha_block(block: list[str]) -> list[str]:
     if not saw_custom_quirks:
         updated.append(f"  custom_quirks_path: {ZHA_CUSTOM_QUIRKS_PATH}")
     return updated
+
+
+def _has_required_zha_config(text: str) -> bool:
+    """Return True when the YAML text already contains the required ZHA settings."""
+    lines = text.splitlines()
+    start = None
+    for index, line in enumerate(lines):
+        if _ZHA_BLOCK_RE.match(line):
+            start = index
+            break
+
+    if start is None:
+        return False
+
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        line = lines[index]
+        if line and not line.startswith((" ", "\t", "#")):
+            end = index
+            break
+
+    saw_enable_quirks = False
+    saw_custom_quirks = False
+    for line in lines[start + 1:end]:
+        enable_match = _ENABLE_QUIRKS_RE.match(line)
+        if enable_match and enable_match.group(1) == "true":
+            saw_enable_quirks = True
+        custom_match = _CUSTOM_QUIRKS_RE.match(line)
+        if custom_match and custom_match.group(1).strip() == ZHA_CUSTOM_QUIRKS_PATH:
+            saw_custom_quirks = True
+
+    return saw_enable_quirks and saw_custom_quirks
 
 
 def _deploy_quirks(config_dir: str) -> None:
