@@ -174,7 +174,10 @@ class GenericEntityNameSync(BaseNameSync):
         new_state = event.data.get("new_state")
         if new_state is None:
             return
-        if old_state is not None and old_state.name == new_state.name:
+        # Ignore entity-added startup events; only real rename changes should sync.
+        if old_state is None:
+            return
+        if old_state.name == new_state.name:
             return
         await self._async_sync_name(new_state.name, reason="state_changed")
 
@@ -340,7 +343,10 @@ class RelayNameSync(BaseNameSync):
         new_state = event.data.get("new_state")
         if new_state is None:
             return
-        if old_state is not None and old_state.name == new_state.name:
+        # Ignore entity-added startup events; only real rename changes should sync.
+        if old_state is None:
+            return
+        if old_state.name == new_state.name:
             return
 
         await self._async_sync_from_switch_name(new_state.name, reason="state_changed")
