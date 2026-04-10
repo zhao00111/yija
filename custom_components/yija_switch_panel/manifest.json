@@ -2,7 +2,8 @@
   "domain": "yija_switch_panel",
   "name": "Yija Switch panel",
   "version": "0.3.3-final-forcehass",
-  "documentation": "https://example.invalid/yija_switch_panel",
+  "documentation": "https://github.com/zhao00111/yija",
+  "issue_tracker": "https://github.com/zhao00111/yija/issues",
   "dependencies": [
     "zha"
   ],
