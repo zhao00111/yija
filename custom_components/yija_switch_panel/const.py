@@ -4,6 +4,7 @@ DOMAIN = "yija_switch_panel"
 INTEGRATION_NAME = "Yija Switch panel"
 ZHA_DOMAIN = "zha"
 QUIRKS_DIR = "config/custom_quirks"
+ZHA_CUSTOM_QUIRKS_PATH = "/config/custom_quirks"
 MANAGED_QUIRK_FILES = (
     "ts0601_switch.py",
     "ts0601_switch_screen.py",
