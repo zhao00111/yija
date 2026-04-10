@@ -17,6 +17,11 @@ from zhaquirks.tuya import TuyaDPType
 
 from .const import (
     DOMAIN,
+    ENABLE_CURTAIN_GROUP_NAME_SYNC,
+    ENABLE_LIGHT_GROUP_NAME_SYNC,
+    ENABLE_RELAY_NAME_SYNC,
+    ENABLE_SCENE_NAME_SYNC,
+    MAX_TEXT_LENGTH,
     RELAY_ATTRS,
     RELAY_ATTR_NAMES,
     RELAY_NAME_ENCODING,
@@ -97,20 +102,21 @@ class RelayNameSyncManager:
                 continue
 
             if device.manufacturer in TARGET_MANUFACTURERS:
-                for relay_index, attr_id in RELAY_ATTRS.items():
-                    unique_id = f"{ieee}-relay_sync_{relay_index}"
-                    if unique_id in self._relay_syncs:
-                        continue
+                if ENABLE_RELAY_NAME_SYNC:
+                    for relay_index, attr_id in RELAY_ATTRS.items():
+                        unique_id = f"{ieee}-relay_sync_{relay_index}"
+                        if unique_id in self._relay_syncs:
+                            continue
 
-                    relay_sync = RelayNameSync(
-                        hass=self.hass,
-                        ieee=ieee,
-                        relay_index=relay_index,
-                        attr_id=attr_id,
-                    )
-                    attached = await relay_sync.async_setup()
-                    if attached:
-                        self._relay_syncs[unique_id] = relay_sync
+                        relay_sync = RelayNameSync(
+                            hass=self.hass,
+                            ieee=ieee,
+                            relay_index=relay_index,
+                            attr_id=attr_id,
+                        )
+                        attached = await relay_sync.async_setup()
+                        if attached:
+                            self._relay_syncs[unique_id] = relay_sync
 
             if device.manufacturer in F3PRO_MANUFACTURERS:
                 for unique_id, sync_obj in _build_f3pro_syncs(self.hass, ieee):
@@ -151,10 +157,11 @@ class GenericEntityNameSync(BaseNameSync):
             self._async_handle_name_change,
         )
         if state := self.hass.states.get(self._entity_id):
-            self.hass.async_create_task(
-                self._async_sync_name(state.name, reason="initial"),
-                name=f"tuya_name_initial_{self._entity_id}",
-            )
+            if state.name:
+                self._last_synced_name = _prepare_name_for_device(
+                    self._name_transform(state.name),
+                    log_truncation=False,
+                )
         return True
 
     async def async_unload(self) -> None:
@@ -163,15 +170,18 @@ class GenericEntityNameSync(BaseNameSync):
             self._unsubscribe_state = None
 
     async def _async_handle_name_change(self, event) -> None:
+        old_state = event.data.get("old_state")
         new_state = event.data.get("new_state")
         if new_state is None:
+            return
+        if old_state is not None and old_state.name == new_state.name:
             return
         await self._async_sync_name(new_state.name, reason="state_changed")
 
     async def _async_sync_name(self, entity_name: str | None, reason: str) -> None:
         if not entity_name:
             return
-        final_name = self._name_transform(entity_name)
+        final_name = _prepare_name_for_device(self._name_transform(entity_name))
         if not final_name:
             return
         if final_name == self._last_synced_name and reason != "initial":
@@ -194,36 +204,40 @@ def _build_f3pro_syncs(hass: HomeAssistant, ieee: str) -> list[tuple[str, BaseNa
     specs: list[tuple[str, str, int, str, object]] = []
 
     for index in range(1, 5):
-        specs.append((
-            f"f3pro-switch-{index}",
-            _find_entity_id_by_name(hass, ieee, "switch", f"Switch {index}"),
-            0xEF00 + 136 + index,
-            f"switch_name_{index}",
-            lambda value: value,
-        ))
-        specs.append((
-            f"f3pro-light-{index}",
-            _find_entity_id_by_name(hass, ieee, "switch", f"Light Group {index}") or _find_entity_id_by_name(hass, ieee, "switch", f"Light Group {index} Power"),
-            0xEF00 + 124 + index,
-            f"light_group_name_{index}",
-            lambda value: _strip_power_suffix(value),
-        ))
-        specs.append((
-            f"f3pro-curtain-{index}",
-            _find_entity_id_by_name(hass, ieee, "select", f"Curtain Group {index}") or _find_entity_id_by_name(hass, ieee, "select", f"Curtain Group {index} Control"),
-            0xEF00 + 128 + index,
-            f"curtain_group_name_{index}",
-            lambda value: _strip_control_suffix(value),
-        ))
+        if ENABLE_RELAY_NAME_SYNC:
+            specs.append((
+                f"f3pro-switch-{index}",
+                _find_entity_id_by_name(hass, ieee, "switch", f"Switch {index}"),
+                0xEF00 + 136 + index,
+                f"switch_name_{index}",
+                lambda value: value,
+            ))
+        if ENABLE_LIGHT_GROUP_NAME_SYNC:
+            specs.append((
+                f"f3pro-light-{index}",
+                _find_entity_id_by_name(hass, ieee, "switch", f"Light Group {index} Power"),
+                0xEF00 + 124 + index,
+                f"light_group_name_{index}",
+                _strip_power_suffix,
+            ))
+        if ENABLE_CURTAIN_GROUP_NAME_SYNC:
+            specs.append((
+                f"f3pro-curtain-{index}",
+                _find_entity_id_by_name(hass, ieee, "select", f"Curtain Group {index} Control"),
+                0xEF00 + 128 + index,
+                f"curtain_group_name_{index}",
+                _strip_control_suffix,
+            ))
 
-    for index in range(1, 9):
-        specs.append((
-            f"f3pro-scene-{index}",
-            _find_entity_id_by_name(hass, ieee, "sensor", f"Scene {index} Last Triggered"),
-            0xEF00 + 140 + index,
-            f"scene_name_{index}",
-            _strip_scene_suffix,
-        ))
+    if ENABLE_SCENE_NAME_SYNC:
+        for index in range(1, 9):
+            specs.append((
+                f"f3pro-scene-{index}",
+                _find_entity_id_by_name(hass, ieee, "sensor", f"Scene {index} Last Triggered"),
+                0xEF00 + 140 + index,
+                f"scene_name_{index}",
+                _strip_scene_suffix,
+            ))
 
     syncs: list[tuple[str, BaseNameSync]] = []
     for key, entity_id, attr_id, attr_name_id, transform in specs:
@@ -306,10 +320,11 @@ class RelayNameSync(BaseNameSync):
         )
 
         if state := self.hass.states.get(switch_entity_id):
-            self.hass.async_create_task(
-                self._async_sync_from_switch_name(state.name, reason="initial"),
-                name=f"tuya_relay_name_initial_{self._relay_index}",
-            )
+            if state.name:
+                self._last_synced_switch_name = _prepare_name_for_device(
+                    state.name,
+                    log_truncation=False,
+                )
 
         return True
 
@@ -321,14 +336,20 @@ class RelayNameSync(BaseNameSync):
 
     async def _async_handle_switch_name_change(self, event) -> None:
         """Mirror HA switch friendly_name changes to the panel label."""
+        old_state = event.data.get("old_state")
         new_state = event.data.get("new_state")
         if new_state is None:
+            return
+        if old_state is not None and old_state.name == new_state.name:
             return
 
         await self._async_sync_from_switch_name(new_state.name, reason="state_changed")
 
     async def _async_sync_from_switch_name(self, switch_name: str | None, reason: str) -> None:
         """Push the current HA switch display name to the device when it changes."""
+        if not switch_name:
+            return
+        switch_name = _prepare_name_for_device(switch_name)
         if not switch_name:
             return
 
@@ -483,6 +504,24 @@ def _extract_relay_index_from_entity_entry(entry: er.RegistryEntry) -> int | Non
         if match:
             return int(match.group(1))
     return None
+
+
+def _prepare_name_for_device(value: str, *, log_truncation: bool = True) -> str:
+    """Normalize names before sending them to the device."""
+    normalized = " ".join(value.strip().split())
+    if len(normalized) <= MAX_TEXT_LENGTH:
+        return normalized
+
+    truncated = normalized[:MAX_TEXT_LENGTH].rstrip()
+    if log_truncation:
+        _LOGGER.warning(
+            "name sync truncated value from %s to %s chars: %s -> %s",
+            len(normalized),
+            len(truncated),
+            normalized,
+            truncated,
+        )
+    return truncated
 
 
 def _build_relay_name_data(value: str) -> TuyaData:

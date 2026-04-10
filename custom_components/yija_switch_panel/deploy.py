@@ -1,4 +1,4 @@
-"""Deploy bundled ZHA quirk files into Home Assistant's custom_quirks directory."""
+"""Deploy bundled ZHA quirk files into Home Assistant's config/custom_quirks directory."""
 
 from __future__ import annotations
 
@@ -21,11 +21,20 @@ async def async_deploy_quirks(hass: HomeAssistant) -> None:
     await hass.async_add_executor_job(_reload_quirk_registry, config_dir)
 
 
+def _resolve_target_dir(config_dir: str) -> Path:
+    """Resolve the effective custom quirks directory for the current HA runtime."""
+    config_path = Path(config_dir)
+    quirks_path = Path(QUIRKS_DIR)
+    if quirks_path.parts[:1] == ("config",) and config_path.name == "config":
+        return config_path / Path(*quirks_path.parts[1:])
+    return config_path / quirks_path
+
+
 def _deploy_quirks(config_dir: str) -> None:
     """Synchronously deploy bundled quirk files on disk."""
     package_dir = Path(__file__).resolve().parent
     source_dir = package_dir / "quirks"
-    target_dir = Path(config_dir) / QUIRKS_DIR
+    target_dir = _resolve_target_dir(config_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
     for filename in MANAGED_QUIRK_FILES:
@@ -50,6 +59,6 @@ def _deploy_quirks(config_dir: str) -> None:
 
 def _reload_quirk_registry(config_dir: str) -> None:
     """Force zhaquirks to reload built-in and custom quirk modules."""
-    custom_quirks_path = str(Path(config_dir) / QUIRKS_DIR)
+    custom_quirks_path = str(_resolve_target_dir(config_dir))
     zhaquirks.setup(custom_quirks_path)
     _LOGGER.warning("%s reloaded zhaquirks using %s", DOMAIN, custom_quirks_path)

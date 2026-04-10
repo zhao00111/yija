@@ -3,11 +3,16 @@
 DOMAIN = "yija_switch_panel"
 INTEGRATION_NAME = "Yija Switch panel"
 ZHA_DOMAIN = "zha"
-QUIRKS_DIR = "custom_quirks"
+QUIRKS_DIR = "config/custom_quirks"
 MANAGED_QUIRK_FILES = (
     "ts0601_switch.py",
     "ts0601_switch_screen.py",
 )
+
+ENABLE_RELAY_NAME_SYNC = True
+ENABLE_LIGHT_GROUP_NAME_SYNC = True
+ENABLE_CURTAIN_GROUP_NAME_SYNC = True
+ENABLE_SCENE_NAME_SYNC = True
 
 TARGET_MANUFACTURERS = {"_TZE284_atuj3i0w", "_TZE284_iwyqtclw", "_TZE284_ue6veoat", "_TZE284_vluc293a", "_TZE284_dqwis3rw", "_TZE284_a8wey4go"}
 TARGET_MODEL = "TS0601"
@@ -33,7 +38,7 @@ RELAY_ATTR_NAMES = {
 }
 
 SCAN_INTERVAL_SECONDS = 30
-MAX_TEXT_LENGTH = 32
+MAX_TEXT_LENGTH = 16
 
 # Test encoding used for relay-name datapoints.
 # Options:

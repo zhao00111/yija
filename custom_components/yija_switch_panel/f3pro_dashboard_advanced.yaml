@@ -1,0 +1,165 @@
+title: F3 Pro 高级仪表板
+views:
+  - title: F3 Pro
+    path: f3pro
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: 开关面板
+            icon: mdi:light-switch
+
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_switch_1
+            name: 开关一
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_switch_2
+            name: 开关二
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_switch_3
+            name: 开关三
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_switch_4
+            name: 开关四
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: 调光面板
+            icon: mdi:brightness-6
+
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_light_group_1_power
+            name: 灯光一
+          - type: entities
+            title: 灯光一调节
+            show_header_toggle: false
+            entities:
+              - entity: number.tze284_idn2htgu_ts0601_light_group_1_brightness
+                name: 亮度
+              - entity: number.tze284_idn2htgu_ts0601_light_group_1_color_temp
+                name: 色温
+
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_light_group_2_power
+            name: 灯光二
+          - type: entities
+            title: 灯光二调节
+            show_header_toggle: false
+            entities:
+              - entity: number.tze284_idn2htgu_ts0601_light_group_2_brightness
+                name: 亮度
+              - entity: number.tze284_idn2htgu_ts0601_light_group_2_color_temp
+                name: 色温
+
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_light_group_3_power
+            name: 灯光三
+          - type: entities
+            title: 灯光三调节
+            show_header_toggle: false
+            entities:
+              - entity: number.tze284_idn2htgu_ts0601_light_group_3_brightness
+                name: 亮度
+              - entity: number.tze284_idn2htgu_ts0601_light_group_3_color_temp
+                name: 色温
+
+          - type: tile
+            entity: switch.tze284_idn2htgu_ts0601_light_group_4_power
+            name: 灯光四
+          - type: entities
+            title: 灯光四调节
+            show_header_toggle: false
+            entities:
+              - entity: number.tze284_idn2htgu_ts0601_light_group_4_brightness
+                name: 亮度
+              - entity: number.tze284_idn2htgu_ts0601_light_group_4_color_temp
+                name: 色温
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: 窗帘面板
+            icon: mdi:curtains
+
+          - type: entities
+            title: 窗帘一
+            show_header_toggle: false
+            entities:
+              - entity: select.tze284_idn2htgu_ts0601_curtain_group_1_control
+                name: 动作
+              - entity: number.tze284_idn2htgu_ts0601_curtain_group_1_position
+                name: 位置
+
+          - type: entities
+            title: 窗帘二
+            show_header_toggle: false
+            entities:
+              - entity: select.tze284_idn2htgu_ts0601_curtain_group_2_control
+                name: 动作
+              - entity: number.tze284_idn2htgu_ts0601_curtain_group_2_position
+                name: 位置
+
+          - type: entities
+            title: 窗帘三
+            show_header_toggle: false
+            entities:
+              - entity: select.tze284_idn2htgu_ts0601_curtain_group_3_control
+                name: 动作
+              - entity: number.tze284_idn2htgu_ts0601_curtain_group_3_position
+                name: 位置
+
+          - type: entities
+            title: 窗帘四
+            show_header_toggle: false
+            entities:
+              - entity: select.tze284_idn2htgu_ts0601_curtain_group_4_control
+                name: 动作
+              - entity: number.tze284_idn2htgu_ts0601_curtain_group_4_position
+                name: 位置
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: 面板设置
+            icon: mdi:cog
+
+          - type: entities
+            title: 设备设置
+            show_header_toggle: false
+            entities:
+              - entity: switch.tze284_idn2htgu_ts0601_backlight
+                name: 背光
+              - entity: select.tze284_idn2htgu_ts0601_power_on_state
+                name: 通电后状态
+              - entity: select.tze284_idn2htgu_ts0601_panel_mode
+                name: 面板模式
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: 场景触发
+            icon: mdi:gesture-tap-button
+
+          - type: entities
+            title: 最近触发时间
+            show_header_toggle: false
+            entities:
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_1_last_triggered
+                name: 场景一
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_2_last_triggered
+                name: 场景二
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_3_last_triggered
+                name: 场景三
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_4_last_triggered
+                name: 场景四
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_5_last_triggered
+                name: 场景五
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_6_last_triggered
+                name: 场景六
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_7_last_triggered
+                name: 场景七
+              - entity: sensor.tze284_idn2htgu_ts0601_scene_8_last_triggered
+                name: 场景八

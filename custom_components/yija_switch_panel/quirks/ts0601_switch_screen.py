@@ -475,7 +475,7 @@ def _register_f3pro_screen_quirk(manufacturer: str) -> None:
                 translation_key=f"light_group_{group_index}_power",
                 fallback_name=f"Light Group {group_index} Power",
                 entity_type=EntityType.STANDARD,
-                initially_disabled=True,
+                initially_disabled=False,
             )
             .tuya_number(
                 dp_id=bright_dp,
@@ -488,7 +488,7 @@ def _register_f3pro_screen_quirk(manufacturer: str) -> None:
                 translation_key=f"light_group_{group_index}_brightness",
                 fallback_name=f"Light Group {group_index} Brightness",
                 entity_type=EntityType.STANDARD,
-                initially_disabled=True,
+                initially_disabled=False,
             )
             .tuya_number(
                 dp_id=warm_dp,
@@ -501,7 +501,7 @@ def _register_f3pro_screen_quirk(manufacturer: str) -> None:
                 translation_key=f"light_group_{group_index}_color_temp",
                 fallback_name=f"Light Group {group_index} Color Temp",
                 entity_type=EntityType.STANDARD,
-                initially_disabled=True,
+                initially_disabled=False,
             )
         )
 
@@ -520,7 +520,7 @@ def _register_f3pro_screen_quirk(manufacturer: str) -> None:
                 translation_key=f"curtain_group_{group_index}_position",
                 fallback_name=f"Curtain Group {group_index} Position",
                 entity_type=EntityType.STANDARD,
-                initially_disabled=True,
+                initially_disabled=False,
             )
             .tuya_enum(
                 dp_id=control_dp,
@@ -529,7 +529,7 @@ def _register_f3pro_screen_quirk(manufacturer: str) -> None:
                 translation_key=f"curtain_group_{group_index}_control",
                 fallback_name=f"Curtain Group {group_index} Control",
                 entity_type=EntityType.STANDARD,
-                initially_disabled=True,
+                initially_disabled=False,
             )
         )
 

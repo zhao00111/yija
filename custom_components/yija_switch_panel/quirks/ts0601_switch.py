@@ -221,7 +221,7 @@ def _register_f3pro_quirk(manufacturer: str) -> None:
                 dp_id=switch_dp,
                 attribute_name=f"light_group_{group_index}_power",
                 translation_key=f"light_group_{group_index}_power",
-                fallback_name=f"Light Group {group_index}",
+                fallback_name=f"Light Group {group_index} Power",
                 entity_type=EntityType.STANDARD,
                 initially_disabled=False,
             )
@@ -275,7 +275,7 @@ def _register_f3pro_quirk(manufacturer: str) -> None:
                 attribute_name=f"curtain_group_{group_index}_control",
                 enum_class=CurtainControl,
                 translation_key=f"curtain_group_{group_index}_control",
-                fallback_name=f"Curtain Group {group_index}",
+                fallback_name=f"Curtain Group {group_index} Control",
                 entity_type=EntityType.STANDARD,
                 initially_disabled=False,
             )
