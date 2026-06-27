@@ -20,6 +20,13 @@ TARGET_MODEL = "TS0601"
 
 F3PRO_MANUFACTURERS = {"_TZE284_7zazvlyn", "_TZE284_idn2htgu"}
 
+KNOB_DIMMER_MANUFACTURERS = {
+    "_TZE200_tgeqdjgk",
+    "_TZE204_tgeqdjgk",
+    "_TZE284_tgeqdjgk",
+    "tgeqdjgk",
+}
+
 TUYA_CLUSTER_ID = 61184
 TUYA_CLUSTER_TYPE = "in"
 TUYA_ENDPOINT_ID = 1

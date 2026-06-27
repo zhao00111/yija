@@ -53,6 +53,7 @@ Yija Switch Panel 是一款面向 Home Assistant 的自定义集成，支持多�
 | M8-Pro | 4键 + 屏幕（天气 / 时间） |
 | M9-Pro | 4键 + 高级UI |
 | F3 Pro | 旗舰款 |
+| Knob Dimmer | 旋钮调光开关（产品ID：tgeqdjgk） |
 
 ---
 

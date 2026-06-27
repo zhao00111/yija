@@ -1,3 +1,8 @@
+0.3.8
+- Added preliminary support for the Tuya knob dimmer switch protocol product ID tgeqdjgk.
+- Mapped button modes, dimmer power, brightness, color temperature, countdown, scene selectors, two switches, and mode/type configuration datapoints from protocol_tgeqdjgk_20260627.pdf.
+- Registered common TS0601 manufacturer variants for tgeqdjgk: _TZE200_tgeqdjgk, _TZE204_tgeqdjgk, _TZE284_tgeqdjgk, and tgeqdjgk.
+
 Ultimate recognition build
 - Added _TZE284_atuj3i0w to ts0601_switch.py manufacturer map
 - Keeps all known TS0601 screen-switch manufacturers in ts0601_switch_screen.py
